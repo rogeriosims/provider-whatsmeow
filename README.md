@@ -65,6 +65,44 @@ curl http://localhost:8080/sessions/main/qr
 
 ---
 
+## Configuração (Variáveis de Ambiente)
+
+A configuração do provider é feita exclusivamente através de variáveis de ambiente. A seguir, uma lista completa de todas as variáveis disponíveis.
+
+### Variáveis Essenciais
+
+| Variável      | Descrição                                                                                               | Padrão                                         |
+| :------------ | :------------------------------------------------------------------------------------------------------ | :--------------------------------------------- |
+| `AMQP_URL`    | URL de conexão completa para o RabbitMQ.                                                                | `amqp://user_test:123456@localhost:5672/vhost` |
+| `REDIS_URL`   | URL de conexão completa para o Redis, usado para o status da sessão. Deixe em branco para desabilitar.      | `""`                                           |
+| `HTTP_ADDR`   | Endereço e porta em que a API HTTP interna ficará escutando.                                              | `:8080`                                        |
+
+### Comportamento do Provider
+
+| Variável                       | Descrição                                                                                                                                                             | Padrão        |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------ |
+| `LOG_LEVEL`                    | Define o nível de detalhe dos logs. Valores: `error` (mínimo), `info` (padrão), `debug` (máximo, útil para depuração).                                                      | `info`        |
+| `REJECT_CALLS`                 | Se `true`, rejeita automaticamente todas as chamadas de voz e vídeo recebidas.                                                                                          | `true`        |
+| `REJECT_CALLS_MESSAGE`         | Mensagem de texto opcional a ser enviada para a pessoa cuja chamada foi rejeitada.                                                                                      | `""`          |
+| `SESSION_STORE`                | Caminho no contêiner onde os dados da sessão (tokens, etc.) são armazenados para persistência.                                                                            | `./state/whatsmeow` |
+| `MARK_READ_ON_MESSAGE`         | Se `true`, marca as conversas como lidas assim que uma nova mensagem é recebida.                                                                                       | `false`       |
+| `AUDIO_PTT_DEFAULT`            | Se `true`, envia todas as mensagens de áudio como "Push-to-Talk" (PTT), ou seja, como se tivessem sido gravadas no app.                                                    | `true`        |
+| `ALWAYS_ONLINE`                | Se `true`, mantém o status da presença como "online" enviando pings periódicos para o WhatsApp.                                                                           | `false`       |
+| `ALWAYS_ONLINE_INTERVAL_SECONDS` | Intervalo em segundos para o envio dos pings de presença "online".                                                                                                       | `60`          |
+| `IGNORE_STATUS_BROADCAST`      | Se `true`, ignora o recebimento de mensagens de "Status" (stories) dos contatos.                                                                                         | `true`        |
+| `IGNORE_NEWSLETTERS`           | Se `true`, ignora o recebimento de mensagens de canais (Newsletters).                                                                                                  | `true`        |
+| `WEBHOOK_BASE`                 | URL base para onde os webhooks de eventos (como recebimento de mensagens) serão enviados (Cloud-like). Deixe em branco para desabilitar.                                   | `""`          |
+| `PN_RESOLVER_URL`              | URL de um serviço HTTP externo para resolver um número de telefone para o formato correto do WhatsApp.                                                                    | `""`          |
+
+### Configuração do RabbitMQ
+
+| Variável              | Descrição                                                                                                                                         | Padrão                  |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- |
+| `AMQP_EXCHANGE`       | Nome da exchange do RabbitMQ onde as mensagens de saída são publicadas.                                                                            | `unoapi.outgoing`       |
+| `AMQP_QUEUE`          | Nome da fila que será criada e consumida por este serviço.                                                                                           | `outgoing.whatsmeow`    |
+| `AMQP_BINDING`        | O padrão da "routing key" usado para ligar a fila à exchange.                                                                                       | `provider.whatsmeow.*`  |
+| `AMQP_WEBHOOK_EXCHANGE` | A exchange para a qual os webhooks (payloads Cloud-like) serão publicados para a UnoAPI consumir.                                                  | `unoapi.brigde`         |
+
 ## Arquitetura e Implantação em Produção
 
 Esta seção descreve a arquitetura completa do sistema UnoAPI, incluindo a aplicação principal e este provider, e como implantar todo o conjunto em um ambiente de produção usando Docker Swarm, Traefik e Portainer.
